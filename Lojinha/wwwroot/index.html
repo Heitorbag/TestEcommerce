@@ -1,0 +1,295 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar API's</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+    <h1>Gerenciar API's</h1>
+
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#usuariosModal">
+        Gerenciar Usuários
+    </button>
+
+    <div class="modal fade" id="usuariosModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="usuariosModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="usuariosModalLabel">Gerenciador de Usuários</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                    <form id="usuarioForm">
+                        <h2>Adicionar Usuário</h2>
+                        <input type="text" id="nome" placeholder="Nome" required>
+                        <input type="email" id="email" placeholder="Email" required>
+                        <input type="text" id="endereco" placeholder="Endereço" required>
+                        <button type="submit">Adicionar</button>
+                    </form>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nome</th>
+                                <th>Email</th>
+                                <th>Endereço</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usuarioTable">
+                        </tbody>
+                    </table>
+                    <form id="editUsuarioForm" class="hidden">
+                        <h2>Editar Usuário</h2>
+                        <input type="hidden" id="edit-id">
+                        <input type="text" id="edit-nome" placeholder="Nome" required>
+                        <input type="email" id="edit-email" placeholder="Email" required>
+                        <input type="text" id="edit-endereco" placeholder="Endereço" required>
+                        <button type="submit">Salvar</button>
+                        <button type="button" onclick="closeEditUsuarioForm()">Cancelar</button>
+                    </form>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#produtosModal">
+        Gerenciar Produtos
+    </button>
+
+    <div class="modal fade" id="produtosModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="produtosModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="produtosModalLabel">Gerenciador de Produtos</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                    <form id="produtosForm">
+                        <h2>Adicionar Produto</h2>
+                        <input type="text" id="nomeProduto" placeholder="Nome" required>
+                        <input type="number" step="0.01" min="0" max="1000" id="valor" placeholder="Valor" required>
+                        <input type="number" step="0.01" min="0" max="1000" id="estoque" placeholder="Estoque" required>
+                        <button type="submit">Adicionar</button>
+                    </form>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>IdProduto</th>
+                                <th>Nome</th>
+                                <th>Valor</th>
+                                <th>Estoque</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="produtosTable">
+                        </tbody>
+                    </table>
+
+                    <form id="editProdutosForm" class="hidden">
+                        <h2>Editar Produto</h2>
+                        <input type="hidden" id="edit-idproduto">
+                        <input type="text" id="edit-nomeProduto" placeholder="Nome" required>
+                        <input type="number" step="0.01" min="0" max="1000" id="edit-valor" placeholder="Valor" required>
+                        <input type="number" step="0.01" min="0" max="1000" id="edit-estoque" placeholder="Estoque" required>
+                        <button type="submit">Salvar</button>
+                        <button type="button" onclick="closeEditProdutosForm()">Cancelar</button>
+                    </form>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#pedidosModal">
+        Gerenciar Pedidos
+    </button>
+
+    <div class="modal fade" id="pedidosModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="pedidosModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="pedidosModalLabel">Gerenciador de Pedidos</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                    <form id="pedidosForm">
+                        <h2>Adicionar Pedido</h2>
+                        <input type="number" id="idclient" placeholder="IdClient" required>
+                        <button type="submit">Adicionar</button>
+                    </form>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>IdPedido</th>
+                                <th>IdClient</th>
+                                <th>DataPedido</th>
+                                <th>ValorTotal</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pedidoTable">
+                        </tbody>
+                    </table>
+
+                    <form id="editPedidosForm" class="hidden">
+                        <h2>Editar Pedido</h2>
+                        <input type="hidden" id="edit-idpedido">
+                        <input type="number" id="edit-idclient" placeholder="IdClient" required>
+                        <input type="text" id="edit-datapedido" placeholder="DataPedido" required>
+                        <input type="number" step="0.01" min="0" max="1000" id="edit-valortotal" placeholder="ValorTotal" required>
+                        <button type="submit">Salvar</button>
+                        <button type="button" onclick="closeEditPedidosForm()">Cancelar</button>
+                    </form>
+
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#itemPedidosModal">
+        Gerenciar Items Pedidos
+    </button>
+
+    <div class="modal fade" id="itemPedidosModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="itemPedidosModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="itemPedidosModalLabel">Gerenciador de Items Pedidos</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                    <form id="itemsPedidosForm">
+                        <h2>Adicionar Pedido</h2>
+                        <input type="number" step="0.01" min="0" max="1000" id="itemsValor" placeholder="Valor" required>
+                        <input type="number" id="itemsIdPedido" placeholder="IdPedido" required>
+                        <input type="number" id="itemsIdProduto" placeholder="IdProduto" required>
+                        <button type="submit">Adicionar</button>
+                    </form>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>Valor</th>
+                                <th>IdPedido</th>
+                                <th>IdProduto</th>
+                                <th>Quantidade</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="itemsPedidoTable">
+                        </tbody>
+                    </table>
+
+                    <form id="editItemsPedidosForm" class="hidden">
+                        <h2>Editar Item Pedido</h2>
+                        <input type="hidden" id="edit-idItemsPedido">
+                        <input type="number" step="0.01" min="0" max="1000" id="edit-itemsValor" placeholder="Valor" required>
+                        <input type="number" id="edit-itemsIdPedido" placeholder="IdPedido" required>
+                        <input type="number" id="edit-itemsIdProduto" placeholder="IdProduto" required>
+                        <input type="number" step="0.01" min="0" max="1000" id="edit-itemsQuantidade" placeholder="Quantidade" required>
+                        <button type="submit">Salvar</button>
+                        <button type="button" onclick="closeEditItemsPedidosForm()">Cancelar</button>
+                    </form>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#estoqueModal">
+        Gerenciar Estoque
+    </button>
+
+    <div class="modal fade" id="estoqueModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="estoqueModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="estoqueModalLabel">Gerenciador de Estoque</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                    <form id="estoqueForm">
+                        <h2>Adicionar item ao estoque</h2>
+                        <input type="text" id="nomeEstoque" placeholder="Nome" required>
+                        <input type="number" id="idProdutoEstoque" placeholder="IdProduto">
+                        <input type="number" step="0.01" min="0" max="1000" id="quantidade" placeholder="Quantidade" required>
+                        <button type="submit">Adicionar</button>
+                    </form>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>Nome</th>
+                                <th>IdProduto</th>
+                                <th>Quantidade</th>
+                                <th>DataEntrada</th>
+                                <th>DataSaida</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="estoqueTable">
+                        </tbody>
+                    </table>
+
+                    <form id="editEstoqueForm" class="hidden">
+                        <h2>Editar Item Pedido</h2>
+                        <input type="hidden" id="edit-idEstoque">
+                        <input type="text" id="edit-nomeEstoque" placeholder="Nome" required>
+                        <input type="number" id="edit-idProdutoEstoque" placeholder="IdProduto" required>
+                        <input type="number" step="0.01" min="0" max="1000" id="edit-quantidade" placeholder="Quantidade" required>
+                        <input type="text" id="edit-dataEntrada" placeholder="DataEntrada" required>
+                        <input type="text" id="edit-dataSaida" placeholder="DataSaida" required>
+                        <button type="submit">Salvar</button>
+                        <button type="button" onclick="closeEditEstoqueForm()">Cancelar</button>
+                    </form>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="js/usuario.js"></script>
+    <script src="js/produtos.js"></script>
+    <script src="js/pedidos.js"></script>
+    <script src="js/itemsPedidos.js"></script>
+    <script src="js/estoque.js"></script>
+</body>
+</html>

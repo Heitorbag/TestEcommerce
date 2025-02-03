@@ -9,5 +9,6 @@ namespace Lojinha.Models
         public decimal Valor { get; set; }
         public int IdPedido { get; set; }
         public int IdProduto { get; set; }
+        public decimal Quantidade { get; set; }
     }
 }

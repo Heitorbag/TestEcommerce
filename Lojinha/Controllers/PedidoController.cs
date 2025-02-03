@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Lojinha.Models;
+using System.Drawing;
+using System.Runtime.ConstrainedExecution;
+using Microsoft.AspNetCore.DataProtection;
 
 namespace Lojinha.Controllers
 {
@@ -51,6 +54,22 @@ namespace Lojinha.Controllers
                 return BadRequest();
             }
 
+            if (pedido.IdClient == 0)
+            {
+                return BadRequest("O ID do Cliente não pode ser zero.");
+            }
+
+            var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Id == pedido.IdClient);
+            if (usuario == null)
+            {
+                return BadRequest("Cliente não encontrado.");
+            }
+
+            if (decimal.IsNegative(pedido.ValorTotal))
+            {
+                return BadRequest("Valor não pode ser negativo.");
+            }
+                
             _context.Entry(pedido).State = EntityState.Modified;
 
             try
@@ -77,6 +96,25 @@ namespace Lojinha.Controllers
         [HttpPost]
         public async Task<ActionResult<Pedido>> PostPedido(Pedido pedido)
         {
+           
+            if (pedido.IdClient == 0)
+            {
+                return BadRequest("O ID do Cliente não pode ser zero.");
+            }
+
+            var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Id == pedido.IdClient); 
+            if (usuario == null)
+            {
+                return BadRequest("Cliente não encontrado.");
+            }
+
+            if (decimal.IsNegative(pedido.ValorTotal))
+            {
+                return BadRequest("Valor não pode ser negativo.");
+            }
+
+            pedido.DataPedido = DateTime.Now.ToString("dd/MM/yyyy");
+
             _context.Pedidos.Add(pedido);
             await _context.SaveChangesAsync();
 
@@ -91,6 +129,27 @@ namespace Lojinha.Controllers
             if (pedido == null)
             {
                 return NotFound();
+            }
+
+            var itemPedidos = await _context.ItemsPedidos.FirstOrDefaultAsync(i => i.IdPedido == pedido.IdPedido);
+
+            if (itemPedidos != null)
+            {
+                var estoque = await _context.Estoque.FirstOrDefaultAsync(e => e.IdProduto == itemPedidos.IdProduto);
+                if (estoque != null)
+                {
+                    estoque.Quantidade += itemPedidos.Quantidade;
+                    estoque.DataEntrada = $"{DateTime.Now:dd/MM/yyyy} Qtd: {itemPedidos.Quantidade:F2}";
+                    _context.Estoque.Update(estoque);
+
+                    var produto = await _context.Produtos.FirstOrDefaultAsync(p => p.IdProduto == itemPedidos.IdProduto);
+                    if (produto != null)
+                    {
+                        produto.Estoque = estoque.Quantidade;
+                        _context.Produtos.Update(produto);
+                    }
+                }
+                _context.ItemsPedidos.Remove(itemPedidos);
             }
 
             _context.Pedidos.Remove(pedido);

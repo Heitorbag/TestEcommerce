@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Lojinha.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace Lojinha.Controllers
 {
@@ -51,6 +52,29 @@ namespace Lojinha.Controllers
                 return BadRequest();
             }
 
+            if (string.IsNullOrWhiteSpace(usuario.Nome))
+            {
+                return BadRequest("O nome é obrigatório.");
+            };
+
+            if (!usuario.Nome.All(c => char.IsLetter(c) || c == ' '))
+            {
+                return BadRequest("O nome deve conter apenas letras.");
+            };
+
+            if (string.IsNullOrWhiteSpace(usuario.Email) || !new EmailAddressAttribute().IsValid(usuario.Email))
+            {
+                return BadRequest("O E-mail fornecido é inválido.");
+            };
+
+            if (string.IsNullOrWhiteSpace(usuario.Endereco))
+            {
+                return BadRequest("O endereço é obrigatório.");
+            };
+
+            var verificarEmail = await _context.Usuarios.AsNoTracking().FirstOrDefaultAsync(i => i.Id == id);
+
+
             _context.Entry(usuario).State = EntityState.Modified;
 
             try
@@ -77,6 +101,32 @@ namespace Lojinha.Controllers
         [HttpPost]
         public async Task<ActionResult<Usuario>> PostUsuario(Usuario usuario)
         {
+            if (string.IsNullOrWhiteSpace(usuario.Nome))
+            {
+                return BadRequest("O nome é obrigatório.");
+            };
+
+            if (!usuario.Nome.All(c => char.IsLetter(c) || c == ' '))
+            {
+                return BadRequest("O nome deve conter apenas letras.");
+            };
+
+            if (string.IsNullOrWhiteSpace(usuario.Email) || !new EmailAddressAttribute().IsValid(usuario.Email))
+            {
+                return BadRequest("O E-mail fornecido é inválido.");
+            };
+
+            if (string.IsNullOrWhiteSpace(usuario.Endereco))
+            {
+                return BadRequest("O endereço é obrigatório.");
+            };
+
+            bool emailExistente = await _context.Usuarios.AnyAsync(u => u.Email == usuario.Email);
+            if (emailExistente)
+            {
+                return BadRequest("Já existe um usuário cadastrado com este e-mail.");
+            }
+
             _context.Usuarios.Add(usuario);
             await _context.SaveChangesAsync();
 
@@ -91,6 +141,31 @@ namespace Lojinha.Controllers
             if (usuario == null)
             {
                 return NotFound();
+            }
+
+            var pedidos = await _context.Pedidos.FirstOrDefaultAsync(p => p.IdClient == usuario.Id);
+            if (pedidos != null)
+            {
+                var itemPedidos = await _context.ItemsPedidos.FirstOrDefaultAsync(i => i.IdPedido == pedidos.IdPedido);
+                if (itemPedidos != null)
+                {
+                    var estoque = await _context.Estoque.FirstOrDefaultAsync(e => e.IdProduto == itemPedidos.IdProduto);
+                    if (estoque != null)
+                    {
+                        estoque.Quantidade += itemPedidos.Quantidade;
+                        estoque.DataEntrada = $"{DateTime.Now:dd/MM/yyyy} Qtd: {itemPedidos.Quantidade:F2}";
+                        _context.Estoque.Update(estoque);
+
+                        var produto = await _context.Produtos.FirstOrDefaultAsync(p => p.IdProduto == itemPedidos.IdProduto);
+                        if (produto != null)
+                        {
+                            produto.Estoque = estoque.Quantidade;
+                            _context.Produtos.Update(produto);
+                        }
+                    }
+                    _context.ItemsPedidos.Remove(itemPedidos);
+                }
+                _context.Pedidos.Remove(pedidos);
             }
 
             _context.Usuarios.Remove(usuario);

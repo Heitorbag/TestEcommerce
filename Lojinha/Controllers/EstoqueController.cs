@@ -51,6 +51,47 @@ namespace Lojinha.Controllers
                 return BadRequest();
             }
 
+            if (string.IsNullOrWhiteSpace(estoque.Nome))
+            {
+                return BadRequest("O nome é obrigatório.");
+            };
+
+            if (!estoque.Nome.All(char.IsLetter))
+            {
+                return BadRequest("O nome deve conter apenas letras.");
+            };
+
+            if (decimal.IsNegative(estoque.Quantidade))
+            {
+                return BadRequest("Quantidade não pode ser negativa!.");
+            }
+
+            var produtos = await _context.Produtos.FirstOrDefaultAsync(p => p.IdProduto == estoque.IdProduto);
+            if (produtos == null || produtos.IdProduto == 0)
+            {
+                return BadRequest("Produto não encontrado.");
+            }
+
+            var itemEstoqueAntigo = await _context.Estoque.AsNoTracking().FirstOrDefaultAsync(i => i.Id == id);
+            if (itemEstoqueAntigo == null)
+            {
+                return BadRequest("Produto antigo não encontrado.");
+            }
+
+            produtos.Estoque = estoque.Quantidade;
+            produtos.Nome = estoque.Nome;
+
+            if (estoque.Quantidade != itemEstoqueAntigo.Quantidade)
+            {
+                estoque.DataEntrada = $"{DateTime.Now:dd/MM/yyyy} Qtd: {estoque.Quantidade:F2}";
+            }
+
+            if (estoque.DataSaida == null)
+            {
+                estoque.DataSaida = "Sem registro de saida.";
+            }
+
+            _context.Produtos.Update(produtos);
             _context.Entry(estoque).State = EntityState.Modified;
 
             try
@@ -77,6 +118,43 @@ namespace Lojinha.Controllers
         [HttpPost]
         public async Task<ActionResult<Estoque>> PostEstoque(Estoque estoque)
         {
+            if (string.IsNullOrWhiteSpace(estoque.Nome))
+            {
+                return BadRequest("O nome é obrigatório.");
+            };
+
+            if (!estoque.Nome.All(c => char.IsLetter(c) || c == ' '))
+            {
+                return BadRequest("O nome deve conter apenas letras.");
+            };
+
+            if (decimal.IsNegative(estoque.Quantidade))
+            {
+                return BadRequest("Quantidade não pode ser negativa!.");
+            }
+
+            var produtos = await _context.Produtos.FirstOrDefaultAsync(p => p.Nome == estoque.Nome);
+            if (produtos == null)
+            {
+                produtos = new Produtos
+                {
+                    Nome = estoque.Nome,
+                    Estoque = estoque.Quantidade,
+                    Valor = 0,
+                };
+
+                _context.Produtos.Add(produtos);
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                return BadRequest("Produto já existe!");
+            }
+
+            estoque.IdProduto = produtos.IdProduto;
+            estoque.DataEntrada = $"{DateTime.Now:dd/MM/yyyy} Qtd: {estoque.Quantidade:F2}";
+            estoque.DataSaida = "Sem registro de saída.";
+
             _context.Estoque.Add(estoque);
             await _context.SaveChangesAsync();
 
@@ -93,6 +171,25 @@ namespace Lojinha.Controllers
                 return NotFound();
             }
 
+            var itemPedidos = await _context.ItemsPedidos.FirstOrDefaultAsync(i => i.IdProduto == estoque.IdProduto);
+            if (itemPedidos != null)
+            {
+                var pedidos = await _context.Pedidos.FirstOrDefaultAsync(p => p.IdPedido == itemPedidos.IdPedido);
+                if (pedidos != null)
+                {
+                    pedidos.ValorTotal = pedidos.ValorTotal - itemPedidos.Valor;
+                    _context.Pedidos.Update(pedidos);
+                }
+                _context.ItemsPedidos.Remove(itemPedidos);
+            }
+
+            var produtos = await _context.Produtos.FirstOrDefaultAsync(p => p.IdProduto == estoque.IdProduto);
+            if (produtos == null)
+            {
+                return BadRequest("Produto não encontrado");
+            }
+
+            _context.Produtos.Remove(produtos);
             _context.Estoque.Remove(estoque);
             await _context.SaveChangesAsync();
 

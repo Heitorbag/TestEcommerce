@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Lojinha.Domain;
+using Microsoft.EntityFrameworkCore;
 
 namespace Lojinha.Models
 {

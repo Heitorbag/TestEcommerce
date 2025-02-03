@@ -5,7 +5,7 @@
 namespace Lojinha.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -18,7 +18,9 @@ namespace Lojinha.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Nome = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IdProduto = table.Column<int>(type: "int", nullable: false),
-                    Quantidade = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false)
+                    Quantidade = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    DataEntrada = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DataSaida = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -48,7 +50,7 @@ namespace Lojinha.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     IdClient = table.Column<int>(type: "int", nullable: false),
                     DataPedido = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ValorTotal = table.Column<int>(type: "int", nullable: false)
+                    ValorTotal = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -62,7 +64,8 @@ namespace Lojinha.Migrations
                     IdProduto = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Nome = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Valor = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false)
+                    Valor = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    Estoque = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
                 },
                 constraints: table =>
                 {

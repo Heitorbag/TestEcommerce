@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Lojinha.Migrations
 {
     [DbContext(typeof(TodoContext))]
-    [Migration("20250127111533_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250130192726_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -31,6 +31,12 @@ namespace Lojinha.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("DataEntrada")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DataSaida")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("IdProduto")
                         .HasColumnType("int");
@@ -84,8 +90,8 @@ namespace Lojinha.Migrations
                     b.Property<int>("IdClient")
                         .HasColumnType("int");
 
-                    b.Property<int>("ValorTotal")
-                        .HasColumnType("int");
+                    b.Property<decimal>("ValorTotal")
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("IdPedido");
 
@@ -99,6 +105,9 @@ namespace Lojinha.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdProduto"));
+
+                    b.Property<decimal>("Estoque")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Nome")
                         .HasColumnType("nvarchar(max)");

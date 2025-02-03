@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Lojinha.Models;
+using System.Net.Http;
 
 namespace Lojinha.Controllers
 {
@@ -51,6 +52,47 @@ namespace Lojinha.Controllers
                 return BadRequest();
             }
 
+            if (string.IsNullOrWhiteSpace(produtos.Nome))
+            {
+                return BadRequest("O nome é obrigatório.");
+            };
+
+            if (!produtos.Nome.All(c => char.IsLetter(c) || c == ' '))
+            {
+                return BadRequest("O nome deve conter apenas letras.");
+            };
+
+            if (decimal.IsNegative(produtos.Estoque))
+            {
+                return BadRequest("Estoque não pode ser negativo!.");
+            }
+
+            var estoque = await _context.Estoque.FirstOrDefaultAsync(e => e.IdProduto == produtos.IdProduto);
+            if (estoque == null || estoque.IdProduto == 0)
+            {
+                return BadRequest("Produto não encontrado.");
+            }
+
+            var itemProdutoAntigo = await _context.Produtos.AsNoTracking().FirstOrDefaultAsync(i => i.IdProduto == id);
+            if (itemProdutoAntigo == null)
+            {
+                return BadRequest("Produto antigo não encontrado.");
+            }
+
+            estoque.Quantidade = produtos.Estoque;
+            estoque.Nome = produtos.Nome;
+
+            if (produtos.Estoque != itemProdutoAntigo.Estoque)
+            {
+                estoque.DataEntrada = $"{DateTime.Now:dd/MM/yyyy} Qtd: {produtos.Estoque:F2}";
+            }
+
+            if (estoque.DataSaida == null)
+            {
+                estoque.DataSaida = "Sem registro de saida.";
+            }
+
+            _context.Estoque.Update(estoque);
             _context.Entry(produtos).State = EntityState.Modified;
 
             try
@@ -77,7 +119,39 @@ namespace Lojinha.Controllers
         [HttpPost]
         public async Task<ActionResult<Produtos>> PostProdutos(Produtos produtos)
         {
+
+            if (string.IsNullOrWhiteSpace(produtos.Nome))
+            {
+                return BadRequest("O nome é obrigatório.");
+            };
+
+            if (!produtos.Nome.All(c => char.IsLetter(c) || c == ' '))
+            {
+                return BadRequest("O nome deve conter apenas letras.");
+            };
+
+            if (produtos.Valor == 0) {
+                return BadRequest("O valor não pode ser zero.");
+            }
+
+            if (decimal.IsNegative(produtos.Estoque))
+            {
+                return BadRequest("Estoque não pode ser negativo!.");
+            }
+
             _context.Produtos.Add(produtos);
+            await _context.SaveChangesAsync();
+
+            Estoque estoque = new Estoque
+            {
+                Nome = produtos.Nome,
+                IdProduto = produtos.IdProduto,
+                Quantidade = produtos.Estoque,
+                DataEntrada = $"{DateTime.Now:dd/MM/yyyy} Qtd: {produtos.Estoque:F2}",
+                DataSaida = "Sem registro de saida."
+            };
+
+            _context.Estoque.Add(estoque);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetProdutos", new { id = produtos.IdProduto }, produtos);
@@ -93,10 +167,29 @@ namespace Lojinha.Controllers
                 return NotFound();
             }
 
+            var itemPedidos = await _context.ItemsPedidos.FirstOrDefaultAsync(i => i.IdProduto == produtos.IdProduto);
+            if (itemPedidos != null)
+            {
+                var pedidos = await _context.Pedidos.FirstOrDefaultAsync(p => p.IdPedido == itemPedidos.IdPedido);
+                if (pedidos != null)
+                {
+                    pedidos.ValorTotal = pedidos.ValorTotal - itemPedidos.Valor;
+                    _context.Pedidos.Update(pedidos);
+                }  
+                _context.ItemsPedidos.Remove(itemPedidos);
+            }
+
+            var estoque = await _context.Estoque.FirstOrDefaultAsync(e => e.IdProduto == produtos.IdProduto);
+            if (estoque == null)
+            {
+                return BadRequest("Produto não encontrado.");
+            }
+
+            _context.Estoque.Remove(estoque);
             _context.Produtos.Remove(produtos);
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return NotFound();
         }
 
         private bool ProdutosExists(int id)

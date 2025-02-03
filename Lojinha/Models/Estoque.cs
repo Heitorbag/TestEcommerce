@@ -9,6 +9,7 @@ namespace Lojinha.Models
         public string? Nome { get; set; }
         public int IdProduto { get; set; }
         public decimal Quantidade { get; set; }
-
+        public string? DataEntrada { get; set; }
+        public string? DataSaida { get; set; }
     }
 }

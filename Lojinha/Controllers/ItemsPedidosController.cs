@@ -46,11 +46,96 @@ namespace Lojinha.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutItemsPedidos(int id, ItemsPedidos itemsPedidos)
         {
+
             if (id != itemsPedidos.Id)
             {
-                return BadRequest();
+                return BadRequest("Item pedido não encontrado.");
             }
 
+            if (itemsPedidos.IdPedido == 0 || itemsPedidos.IdProduto == 0 || itemsPedidos.Valor == 0)
+            {
+                return BadRequest("O valor não pode ser zero.");
+            }
+
+            var itemValorAntigo = await _context.ItemsPedidos.AsNoTracking().FirstOrDefaultAsync(i => i.Id == id);
+            if (itemValorAntigo == null)
+            {
+                return NotFound("Item pedido não encontrado.");
+            }
+
+            var pedidoAntigo = await _context.Pedidos.FirstOrDefaultAsync(p => p.IdPedido == itemValorAntigo.IdPedido);
+            var pedidos = await _context.Pedidos.FirstOrDefaultAsync(p => p.IdPedido == itemsPedidos.IdPedido);
+            if (pedidos == null || pedidoAntigo == null)
+            {
+                return BadRequest("Pedido não encontrado.");
+            }
+
+            var produtoAntigo = await _context.Produtos.FirstOrDefaultAsync(p => p.IdProduto == itemValorAntigo.IdProduto);
+            var estoqueAntigo = await _context.Estoque.FirstOrDefaultAsync(e => e.IdProduto == itemValorAntigo.IdProduto);
+            var produtos = await _context.Produtos.FirstOrDefaultAsync(p => p.IdProduto == itemsPedidos.IdProduto);
+            var estoque = await _context.Estoque.FirstOrDefaultAsync(e => e.IdProduto == itemsPedidos.IdProduto);
+            if (estoque == null || produtos == null || produtoAntigo == null || estoqueAntigo == null)
+            {
+                return BadRequest("Produto não encontrado.");
+            }
+
+            if (itemValorAntigo.IdPedido != itemsPedidos.IdPedido)
+            {
+                pedidoAntigo.ValorTotal = pedidoAntigo.ValorTotal - itemValorAntigo.Valor;
+                if (itemValorAntigo.IdPedido != itemsPedidos.IdPedido && itemsPedidos.Valor == itemValorAntigo.Valor)
+                {
+                    pedidos.ValorTotal = pedidos.ValorTotal + itemsPedidos.Valor;
+                }
+            }
+
+            if (itemsPedidos.Valor > itemValorAntigo.Valor)
+            {
+                if (itemValorAntigo.IdPedido != itemsPedidos.IdPedido)
+                {
+                    pedidos.ValorTotal = pedidos.ValorTotal + itemsPedidos.Valor;
+                }
+                else if (itemValorAntigo.IdPedido == itemsPedidos.IdPedido)
+                {
+                    pedidos.ValorTotal = pedidos.ValorTotal + (itemsPedidos.Valor - itemValorAntigo.Valor);
+                }
+                estoque.Quantidade = estoque.Quantidade - itemsPedidos.Quantidade;
+                produtos.Estoque = estoque.Quantidade;
+                estoque.DataSaida = $"{DateTime.Now:dd/MM/yyyy} Qtd: {itemsPedidos.Quantidade:F2}";
+            }
+            else if (itemsPedidos.Valor < itemValorAntigo.Valor)
+            {
+                if (itemValorAntigo.IdPedido != itemsPedidos.IdPedido)
+                {
+                    pedidos.ValorTotal = pedidos.ValorTotal + itemsPedidos.Valor;
+                }
+                else if (itemValorAntigo.IdPedido == itemsPedidos.IdPedido)
+                {
+                    pedidos.ValorTotal = pedidos.ValorTotal - (itemValorAntigo.Valor - itemsPedidos.Valor);
+                }
+                estoque.Quantidade = estoque.Quantidade + itemsPedidos.Quantidade;
+                produtos.Estoque = estoque.Quantidade;
+                estoque.DataEntrada = $"{DateTime.Now:dd/MM/yyyy} Qtd: {itemsPedidos.Quantidade:F2}";
+            }
+
+            if (produtoAntigo.IdProduto != itemsPedidos.IdProduto)
+            {
+                estoqueAntigo.Quantidade = estoqueAntigo.Quantidade + itemValorAntigo.Quantidade;       
+                produtoAntigo.Estoque = estoqueAntigo.Quantidade;
+                estoqueAntigo.DataEntrada = $"{DateTime.Now:dd/MM/yyyy} Qtd: {itemValorAntigo.Quantidade:F2}";
+            }     
+
+            itemsPedidos.Quantidade = itemsPedidos.Valor / produtos.Valor;
+            if (itemsPedidos.Quantidade > estoque.Quantidade)
+            {
+                return BadRequest("Produto fora de estoque.");
+            }
+
+            estoque.DataSaida = $"{DateTime.Now:dd/MM/yyyy} Qtd: {itemsPedidos.Quantidade:F2}";
+
+            _context.Pedidos.Update(pedidoAntigo);
+            _context.Produtos.Update(produtos);
+            _context.Estoque.Update(estoque);
+            _context.Pedidos.Update(pedidos);
             _context.Entry(itemsPedidos).State = EntityState.Modified;
 
             try
@@ -77,7 +162,45 @@ namespace Lojinha.Controllers
         [HttpPost]
         public async Task<ActionResult<ItemsPedidos>> PostItemsPedidos(ItemsPedidos itemsPedidos)
         {
+
+            if (itemsPedidos.IdPedido == 0 || itemsPedidos.IdProduto == 0 || itemsPedidos.Valor == 0)
+            {
+                return BadRequest("O valor não pode ser zero.");
+            }
+         
+            var pedidos = await _context.Pedidos.FirstOrDefaultAsync(p => p.IdPedido == itemsPedidos.IdPedido);
+            if (pedidos == null)
+            {
+                return BadRequest("Pedido não encontrado.");
+            }
+
+            var produtos = await _context.Produtos.FirstOrDefaultAsync(p => p.IdProduto == itemsPedidos.IdProduto );
+            if (produtos == null)
+            {
+                return BadRequest("Produto não encontrado.");
+            }
+
+            var estoque = await _context.Estoque.FirstOrDefaultAsync(e => e.IdProduto == itemsPedidos.IdProduto);
+            if (estoque == null)
+            {
+                return BadRequest("Produto não encontrado.");
+            }
+
+            itemsPedidos.Quantidade = itemsPedidos.Valor / produtos.Valor;
+            if (itemsPedidos.Quantidade > estoque.Quantidade)
+            {
+                return BadRequest("Produto fora de estoque.");
+            }
+
+            pedidos.ValorTotal = pedidos.ValorTotal + itemsPedidos.Valor;  
+            estoque.Quantidade = estoque.Quantidade - itemsPedidos.Quantidade;
+            estoque.DataSaida = $"{DateTime.Now:dd/MM/yyyy} Qtd: {itemsPedidos.Quantidade:F2}";
+            produtos.Estoque = estoque.Quantidade;
+
+            _context.Estoque.Update(estoque);
+            _context.Pedidos.Update(pedidos);
             _context.ItemsPedidos.Add(itemsPedidos);
+            _context.Produtos.Update(produtos);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetItemsPedidos", new { id = itemsPedidos.Id }, itemsPedidos);
@@ -90,10 +213,33 @@ namespace Lojinha.Controllers
             var itemsPedidos = await _context.ItemsPedidos.FindAsync(id);
             if (itemsPedidos == null)
             {
-                return NotFound();
+                return BadRequest("Item pedido não encontrado.");
             }
 
+            var pedidos = await _context.Pedidos.FirstOrDefaultAsync(p => p.IdPedido == itemsPedidos.IdPedido);
+            if (pedidos != null)
+            {
+                pedidos.ValorTotal = pedidos.ValorTotal - itemsPedidos.Valor;
+                _context.Pedidos.Update(pedidos);
+            }
+      
+            var estoque = await _context.Estoque.FirstOrDefaultAsync(e => e.IdProduto == itemsPedidos.IdProduto);
+            if (estoque != null)
+            {
+                estoque.Quantidade = estoque.Quantidade + itemsPedidos.Quantidade;
+                estoque.DataEntrada = $"{DateTime.Now:dd/MM/yyyy} Qtd: {itemsPedidos.Quantidade:F2}";
+                _context.Estoque.Update(estoque);
+
+                var produtos = await _context.Produtos.FirstOrDefaultAsync(p => p.IdProduto == itemsPedidos.IdProduto);
+                if (produtos != null)
+                {
+                    produtos.Estoque = estoque.Quantidade;
+                    _context.Produtos.Update(produtos);
+                }
+            }
+    
             _context.ItemsPedidos.Remove(itemsPedidos);
+            _context.Entry(itemsPedidos).State = EntityState.Deleted;
             await _context.SaveChangesAsync();
 
             return NoContent();

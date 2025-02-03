@@ -8,5 +8,6 @@ namespace Lojinha.Models
         public int IdProduto { get; set; }
         public string? Nome { get; set; }
         public decimal Valor { get; set; }
+        public decimal Estoque { get; set; }
     }
 }
