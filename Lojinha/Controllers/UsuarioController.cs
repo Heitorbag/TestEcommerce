@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Lojinha.Models;
+using Lojinha.Domain;
 using System.ComponentModel.DataAnnotations;
 
 namespace Lojinha.Controllers
@@ -73,7 +74,19 @@ namespace Lojinha.Controllers
             };
 
             var verificarEmail = await _context.Usuarios.AsNoTracking().FirstOrDefaultAsync(i => i.Id == id);
+            if (verificarEmail == null) 
+            {
+                return BadRequest("E-mail não encontrado.");
+            }     
 
+            if (verificarEmail.Email != usuario.Email)
+            {
+                bool emailExistente = await _context.Usuarios.AnyAsync(u => u.Email == usuario.Email);
+                if (emailExistente)
+                {
+                    return BadRequest("Já existe um usuário cadastrado com este e-mail.");
+                }
+            }
 
             _context.Entry(usuario).State = EntityState.Modified;
 
@@ -153,7 +166,6 @@ namespace Lojinha.Controllers
                     if (estoque != null)
                     {
                         estoque.Quantidade += itemPedidos.Quantidade;
-                        estoque.DataEntrada = $"{DateTime.Now:dd/MM/yyyy} Qtd: {itemPedidos.Quantidade:F2}";
                         _context.Estoque.Update(estoque);
 
                         var produto = await _context.Produtos.FirstOrDefaultAsync(p => p.IdProduto == itemPedidos.IdProduto);

@@ -2,9 +2,8 @@
 
 namespace Lojinha.Models
 {
-    public class Estoque
+    public class EstoqueModel
     {
-        [Key]
         public int Id { get; set; }
         public string? Nome { get; set; }
         public int IdProduto { get; set; }

@@ -19,7 +19,6 @@ function addEstoque(event) {
 
     const estoque = {
         nome: document.getElementById('nomeEstoque').value.trim(),
-        idproduto: document.getElementById('idProdutoEstoque').value.trim(),
         quantidade: document.getElementById('quantidade').value.trim(),
     };
 
@@ -46,8 +45,6 @@ function updateEstoque(event) {
         nome: document.getElementById('edit-nomeEstoque').value.trim(),
         idproduto: document.getElementById('edit-idProdutoEstoque').value.trim(),
         quantidade: document.getElementById('edit-quantidade').value.trim(),
-        dataEntrada: document.getElementById('edit-dataEntrada').value.trim(),
-        dataSaida: document.getElementById('edit-dataSaida').value.trim(),
     };
     fetch(`${estoqueApiUrl}/${id}`, {
         method: 'PUT',
@@ -82,10 +79,8 @@ function displayEstoque(estoque) {
             <td>${estoques.nome}</td>
             <td>${estoques.idProduto}</td>
             <td>${estoques.quantidade}</td>
-            <td>${estoques.dataEntrada}</td>
-             <td>${estoques.dataSaida}</td>
             <td>
-                <button onclick="showEditEstoqueForm(${estoques.id}, '${estoques.nome}', '${estoques.idProduto}', '${estoques.quantidade}', '${estoques.dataEntrada}', '${estoques.dataSaida}')">Editar</button>
+                <button onclick="showEditEstoqueForm(${estoques.id}, '${estoques.nome}', '${estoques.idProduto}', '${estoques.quantidade}')">Editar</button>
                 <button onclick="deleteEstoque(${estoques.id})">Excluir</button>
             </td>
         `;
@@ -93,13 +88,11 @@ function displayEstoque(estoque) {
     })
 }
 
-function showEditEstoqueForm(id, nome, idProduto, quantidade, dataEntrada, dataSaida) {
+function showEditEstoqueForm(id, nome, idProduto, quantidade) {
     document.getElementById('edit-idEstoque').value = id;
     document.getElementById('edit-nomeEstoque').value = nome;
     document.getElementById('edit-idProdutoEstoque').value = idProduto;
     document.getElementById('edit-quantidade').value = quantidade;
-    document.getElementById('edit-dataEntrada').value = dataEntrada;
-    document.getElementById('edit-dataSaida').value = dataSaida;
 
     document.getElementById('editEstoqueForm').classList.remove('hidden');
 }

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Lojinha.Models;
+using Lojinha.Domain;
 using System.Drawing;
 using System.Runtime.ConstrainedExecution;
 using Microsoft.AspNetCore.DataProtection;
@@ -113,7 +114,7 @@ namespace Lojinha.Controllers
                 return BadRequest("Valor não pode ser negativo.");
             }
 
-            pedido.DataPedido = DateTime.Now.ToString("dd/MM/yyyy");
+            pedido.DataPedido = DateTime.Now;
 
             _context.Pedidos.Add(pedido);
             await _context.SaveChangesAsync();
@@ -139,7 +140,6 @@ namespace Lojinha.Controllers
                 if (estoque != null)
                 {
                     estoque.Quantidade += itemPedidos.Quantidade;
-                    estoque.DataEntrada = $"{DateTime.Now:dd/MM/yyyy} Qtd: {itemPedidos.Quantidade:F2}";
                     _context.Estoque.Update(estoque);
 
                     var produto = await _context.Produtos.FirstOrDefaultAsync(p => p.IdProduto == itemPedidos.IdProduto);

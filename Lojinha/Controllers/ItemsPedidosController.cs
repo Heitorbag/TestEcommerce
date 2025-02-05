@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Lojinha.Models;
+using Lojinha.Domain;
 
 namespace Lojinha.Controllers
 {
@@ -100,7 +101,6 @@ namespace Lojinha.Controllers
                 }
                 estoque.Quantidade = estoque.Quantidade - itemsPedidos.Quantidade;
                 produtos.Estoque = estoque.Quantidade;
-                estoque.DataSaida = $"{DateTime.Now:dd/MM/yyyy} Qtd: {itemsPedidos.Quantidade:F2}";
             }
             else if (itemsPedidos.Valor < itemValorAntigo.Valor)
             {
@@ -114,14 +114,12 @@ namespace Lojinha.Controllers
                 }
                 estoque.Quantidade = estoque.Quantidade + itemsPedidos.Quantidade;
                 produtos.Estoque = estoque.Quantidade;
-                estoque.DataEntrada = $"{DateTime.Now:dd/MM/yyyy} Qtd: {itemsPedidos.Quantidade:F2}";
             }
 
             if (produtoAntigo.IdProduto != itemsPedidos.IdProduto)
             {
                 estoqueAntigo.Quantidade = estoqueAntigo.Quantidade + itemValorAntigo.Quantidade;       
                 produtoAntigo.Estoque = estoqueAntigo.Quantidade;
-                estoqueAntigo.DataEntrada = $"{DateTime.Now:dd/MM/yyyy} Qtd: {itemValorAntigo.Quantidade:F2}";
             }     
 
             itemsPedidos.Quantidade = itemsPedidos.Valor / produtos.Valor;
@@ -129,8 +127,6 @@ namespace Lojinha.Controllers
             {
                 return BadRequest("Produto fora de estoque.");
             }
-
-            estoque.DataSaida = $"{DateTime.Now:dd/MM/yyyy} Qtd: {itemsPedidos.Quantidade:F2}";
 
             _context.Pedidos.Update(pedidoAntigo);
             _context.Produtos.Update(produtos);
@@ -194,7 +190,6 @@ namespace Lojinha.Controllers
 
             pedidos.ValorTotal = pedidos.ValorTotal + itemsPedidos.Valor;  
             estoque.Quantidade = estoque.Quantidade - itemsPedidos.Quantidade;
-            estoque.DataSaida = $"{DateTime.Now:dd/MM/yyyy} Qtd: {itemsPedidos.Quantidade:F2}";
             produtos.Estoque = estoque.Quantidade;
 
             _context.Estoque.Update(estoque);
@@ -227,7 +222,6 @@ namespace Lojinha.Controllers
             if (estoque != null)
             {
                 estoque.Quantidade = estoque.Quantidade + itemsPedidos.Quantidade;
-                estoque.DataEntrada = $"{DateTime.Now:dd/MM/yyyy} Qtd: {itemsPedidos.Quantidade:F2}";
                 _context.Estoque.Update(estoque);
 
                 var produtos = await _context.Produtos.FirstOrDefaultAsync(p => p.IdProduto == itemsPedidos.IdProduto);

@@ -17,7 +17,7 @@
     </button>
 
     <div class="modal fade" id="usuariosModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="usuariosModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
+        <div class="modal-dialog modal-dialog-scrollable modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h1 class="modal-title fs-5" id="usuariosModalLabel">Gerenciador de Usuários</h1>
@@ -69,7 +69,7 @@
     </button>
 
     <div class="modal fade" id="produtosModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="produtosModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
+        <div class="modal-dialog modal-dialog-scrollable modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h1 class="modal-title fs-5" id="produtosModalLabel">Gerenciador de Produtos</h1>
@@ -80,8 +80,8 @@
                     <form id="produtosForm">
                         <h2>Adicionar Produto</h2>
                         <input type="text" id="nomeProduto" placeholder="Nome" required>
-                        <input type="number" step="0.01" min="0" max="1000" id="valor" placeholder="Valor" required>
-                        <input type="number" step="0.01" min="0" max="1000" id="estoque" placeholder="Estoque" required>
+                        <input type="number" step="0.01" min="0" max="10000" id="valor" placeholder="Valor" required>
+                        <input type="number" step="0.01" min="0" max="10000" id="estoque" placeholder="Estoque" required>
                         <button type="submit">Adicionar</button>
                     </form>
 
@@ -103,8 +103,8 @@
                         <h2>Editar Produto</h2>
                         <input type="hidden" id="edit-idproduto">
                         <input type="text" id="edit-nomeProduto" placeholder="Nome" required>
-                        <input type="number" step="0.01" min="0" max="1000" id="edit-valor" placeholder="Valor" required>
-                        <input type="number" step="0.01" min="0" max="1000" id="edit-estoque" placeholder="Estoque" required>
+                        <input type="number" step="0.01" min="0" max="10000" id="edit-valor" placeholder="Valor" required>
+                        <input type="number" step="0.01" min="0" max="10000" id="edit-estoque" placeholder="Estoque" required>
                         <button type="submit">Salvar</button>
                         <button type="button" onclick="closeEditProdutosForm()">Cancelar</button>
                     </form>
@@ -123,7 +123,7 @@
     </button>
 
     <div class="modal fade" id="pedidosModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="pedidosModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
+        <div class="modal-dialog modal-dialog-scrollable modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h1 class="modal-title fs-5" id="pedidosModalLabel">Gerenciador de Pedidos</h1>
@@ -156,7 +156,7 @@
                         <input type="hidden" id="edit-idpedido">
                         <input type="number" id="edit-idclient" placeholder="IdClient" required>
                         <input type="text" id="edit-datapedido" placeholder="DataPedido" required>
-                        <input type="number" step="0.01" min="0" max="1000" id="edit-valortotal" placeholder="ValorTotal" required>
+                        <input type="number" step="0.01" min="0" max="10000" id="edit-valortotal" placeholder="ValorTotal" required>
                         <button type="submit">Salvar</button>
                         <button type="button" onclick="closeEditPedidosForm()">Cancelar</button>
                     </form>
@@ -176,7 +176,7 @@
     </button>
 
     <div class="modal fade" id="itemPedidosModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="itemPedidosModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
+        <div class="modal-dialog modal-dialog-scrollable modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h1 class="modal-title fs-5" id="itemPedidosModalLabel">Gerenciador de Items Pedidos</h1>
@@ -186,7 +186,7 @@
 
                     <form id="itemsPedidosForm">
                         <h2>Adicionar Pedido</h2>
-                        <input type="number" step="0.01" min="0" max="1000" id="itemsValor" placeholder="Valor" required>
+                        <input type="number" step="0.01" min="0" max="10000" id="itemsValor" placeholder="Valor" required>
                         <input type="number" id="itemsIdPedido" placeholder="IdPedido" required>
                         <input type="number" id="itemsIdProduto" placeholder="IdProduto" required>
                         <button type="submit">Adicionar</button>
@@ -210,10 +210,10 @@
                     <form id="editItemsPedidosForm" class="hidden">
                         <h2>Editar Item Pedido</h2>
                         <input type="hidden" id="edit-idItemsPedido">
-                        <input type="number" step="0.01" min="0" max="1000" id="edit-itemsValor" placeholder="Valor" required>
+                        <input type="number" step="0.01" min="0" max="10000" id="edit-itemsValor" placeholder="Valor" required>
                         <input type="number" id="edit-itemsIdPedido" placeholder="IdPedido" required>
                         <input type="number" id="edit-itemsIdProduto" placeholder="IdProduto" required>
-                        <input type="number" step="0.01" min="0" max="1000" id="edit-itemsQuantidade" placeholder="Quantidade" required>
+                        <input type="number" step="0.01" min="0" max="10000" id="edit-itemsQuantidade" placeholder="Quantidade" required>
                         <button type="submit">Salvar</button>
                         <button type="button" onclick="closeEditItemsPedidosForm()">Cancelar</button>
                     </form>
@@ -232,7 +232,7 @@
     </button>
 
     <div class="modal fade" id="estoqueModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="estoqueModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
+        <div class="modal-dialog modal-dialog-scrollable modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h1 class="modal-title fs-5" id="estoqueModalLabel">Gerenciador de Estoque</h1>
@@ -243,8 +243,7 @@
                     <form id="estoqueForm">
                         <h2>Adicionar item ao estoque</h2>
                         <input type="text" id="nomeEstoque" placeholder="Nome" required>
-                        <input type="number" id="idProdutoEstoque" placeholder="IdProduto">
-                        <input type="number" step="0.01" min="0" max="1000" id="quantidade" placeholder="Quantidade" required>
+                        <input type="number" step="0.01" min="0" max="10000" id="quantidade" placeholder="Quantidade" required>
                         <button type="submit">Adicionar</button>
                     </form>
 
@@ -255,8 +254,6 @@
                                 <th>Nome</th>
                                 <th>IdProduto</th>
                                 <th>Quantidade</th>
-                                <th>DataEntrada</th>
-                                <th>DataSaida</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
@@ -269,11 +266,127 @@
                         <input type="hidden" id="edit-idEstoque">
                         <input type="text" id="edit-nomeEstoque" placeholder="Nome" required>
                         <input type="number" id="edit-idProdutoEstoque" placeholder="IdProduto" required>
-                        <input type="number" step="0.01" min="0" max="1000" id="edit-quantidade" placeholder="Quantidade" required>
-                        <input type="text" id="edit-dataEntrada" placeholder="DataEntrada" required>
-                        <input type="text" id="edit-dataSaida" placeholder="DataSaida" required>
+                        <input type="number" step="0.01" min="0" max="10000" id="edit-quantidade" placeholder="Quantidade" required>
                         <button type="submit">Salvar</button>
                         <button type="button" onclick="closeEditEstoqueForm()">Cancelar</button>
+                    </form>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#fornecedoresModal">
+        Gerenciar Fornecedores
+    </button>
+
+    <div class="modal fade" id="fornecedoresModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="fornecedoresModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="fornecedoresModalLabel">Gerenciar Fornecedores</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                    <form id="fornecedoresForm">
+                        <h2>Adicionar Fornecedor</h2>
+                        <input type="text" id="nomeFornecedor" placeholder="Nome" required>
+                        <input type="text" id="cnpj" placeholder="CNPJ" required>
+                        <input type="text" id="enderecoForn" placeholder="Endereço" required>
+                        <input type="text" id="telefoneForn" placeholder="Telefone" required>
+                        <input type="email" id="emailForn" placeholder="Email" required>
+                        <button type="submit">Adicionar</button>
+                    </form>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>IdFornecedor</th>
+                                <th>Nome</th>
+                                <th>CNPJ</th>
+                                <th>Endereço</th>
+                                <th>Telefone</th>
+                                <th>Email</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fornecedorTable">
+                        </tbody>
+                    </table>
+
+                    <form id="editFornecedoresForm" class="hidden">
+                        <h2>Editar Fornecedor</h2>
+                        <input type="hidden" id="edit-idFornecedor">
+                        <input type="text" id="edit-nomeFornecedor" placeholder="Nome" required>
+                        <input type="text" id="edit-cnpj" placeholder="CNPJ" required>
+                        <input type="text" id="edit-enderecoForn" placeholder="Endereço" required>
+                        <input type="text" id="edit-telefoneForn" placeholder="Telefone" required>
+                        <input type="email" id="edit-emailForn" placeholder="Email" required>
+                        <button type="submit">Salvar</button>
+                        <button type="button" onclick="closeEditFornecedorForm()">Cancelar</button>
+                    </form>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#moviEstoqueModal">
+        Gerenciar Movimentação
+    </button>
+
+    <div class="modal fade" id="moviEstoqueModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="moviEstoqueModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="moviEstoqueModalLabel">Gerenciar Movimentação</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                    <form id="moviEstoqueForm">
+                        <h2>Adicionar Movimentação</h2>
+                        <input type="number" id="idProdutoMovi" placeholder="IdProduto" required>
+                        <input type="text" id="tipoMovi" placeholder="Tipo Movimentação" required>
+                        <input type="number" step="0.01" min="0" max="10000" id="quantidadeMovi" placeholder="Quantidade" required>
+                        <input type="number" id="idFornecedorMovi" placeholder="IdFornecedor">
+                        <button type="submit">Adicionar</button>
+                    </form>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>IdMovimentacao</th>
+                                <th>IdProduto</th>
+                                <th>Tipo Movimentação</th>
+                                <th>Quantidade</th>
+                                <th>IdFornecedor</th>
+                                <th>Data Movimentação</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="moviEstoqueTable">
+                        </tbody>
+                    </table>
+
+                    <form id="editMoviEstoqueForm" class="hidden">
+                        <h2>Editar Movimentação</h2>
+                        <input type="hidden" id="edit-idMovimentacao">
+                        <input type="number" id="edit-idProdutoMovi" placeholder="IdProduto" required>
+                        <input type="text" id="edit-tipoMovi" placeholder="Tipo Movimentação" required>
+                        <input type="number" step="0.01" min="0" max="10000" id="edit-quantidadeMovi" placeholder="Quantidade" required>
+                        <input type="number" id="edit-idFornecedorMovi" placeholder="IdFornecedor">
+                        <button type="submit">Salvar</button>
+                        <button type="button" onclick="closeEditMoviEstoqueForm()">Cancelar</button>
                     </form>
 
                 </div>
@@ -291,5 +404,8 @@
     <script src="js/pedidos.js"></script>
     <script src="js/itemsPedidos.js"></script>
     <script src="js/estoque.js"></script>
+    <script src="js/fornecedores.js"></script>
+    <script src="js/movimentacaoEstoque.js"></script>
+
 </body>
 </html>

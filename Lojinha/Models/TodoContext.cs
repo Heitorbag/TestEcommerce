@@ -1,5 +1,6 @@
 ﻿using Lojinha.Domain;
 using Microsoft.EntityFrameworkCore;
+using Lojinha.Models;
 
 namespace Lojinha.Models
 {
@@ -15,6 +16,9 @@ namespace Lojinha.Models
         public DbSet<Pedido> Pedidos { get; set; }
         public DbSet<ItemsPedidos> ItemsPedidos { get; set; }
         public DbSet<Estoque> Estoque { get; set; }
+        public DbSet<Fornecedores> Fornecedores { get; set; }
+        public DbSet<MovimentacaoEstoque> MovimentacaoEstoque { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -29,6 +33,7 @@ namespace Lojinha.Models
             modelBuilder.Entity<Produtos>()
                 .Property(p => p.Valor)
                 .HasPrecision(18, 2);
+
         }
     }
 }

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Lojinha.Models;
+using Lojinha.Domain;
 
 namespace Lojinha.Controllers
 {
@@ -79,17 +80,7 @@ namespace Lojinha.Controllers
             }
 
             produtos.Estoque = estoque.Quantidade;
-            produtos.Nome = estoque.Nome;
-
-            if (estoque.Quantidade != itemEstoqueAntigo.Quantidade)
-            {
-                estoque.DataEntrada = $"{DateTime.Now:dd/MM/yyyy} Qtd: {estoque.Quantidade:F2}";
-            }
-
-            if (estoque.DataSaida == null)
-            {
-                estoque.DataSaida = "Sem registro de saida.";
-            }
+            produtos.Nome = estoque.Nome;   
 
             _context.Produtos.Update(produtos);
             _context.Entry(estoque).State = EntityState.Modified;
@@ -152,8 +143,6 @@ namespace Lojinha.Controllers
             }
 
             estoque.IdProduto = produtos.IdProduto;
-            estoque.DataEntrada = $"{DateTime.Now:dd/MM/yyyy} Qtd: {estoque.Quantidade:F2}";
-            estoque.DataSaida = "Sem registro de saída.";
 
             _context.Estoque.Add(estoque);
             await _context.SaveChangesAsync();
