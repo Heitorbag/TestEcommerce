@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Lojinha.Domain;
+﻿using Microsoft.AspNetCore.Mvc;
 using Lojinha.Models;
+using Lojinha.Aplicacao;
 
 namespace Lojinha.Controllers
 {
@@ -14,30 +8,26 @@ namespace Lojinha.Controllers
     [ApiController]
     public class FornecedoresController : ControllerBase
     {
-        private readonly TodoContext _context;
 
-        public FornecedoresController(TodoContext context)
+        private readonly IFornecedoresService _fornecedoresService;
+
+        public FornecedoresController(IFornecedoresService fornecedoresService)
         {
-            _context = context;
+            _fornecedoresService = fornecedoresService;
         }
 
         // GET: api/Fornecedores
         [HttpGet]
         public ActionResult<IEnumerable<FornecedoresModel>> GetFornecedores()
         {
-            return _context.Fornecedores.ToListAsync().GetAwaiter().GetResult().Select(a => a.ToModel()).ToList();
+            return _fornecedoresService.ListFornecedores().Select(a => a.ToModel()).ToList();      
         }
 
         // GET: api/Fornecedores/5
         [HttpGet("{id}")]
         public async Task<ActionResult<FornecedoresModel>> GetFornecedores(int id)
         {
-            var fornecedores = await _context.Fornecedores.FindAsync(id);
-
-            if (fornecedores == null)
-            {
-                return NotFound();
-            }
+            var fornecedores = await _fornecedoresService.GetFornecedores(id);
 
             return fornecedores.ToModel();
         }
@@ -52,34 +42,24 @@ namespace Lojinha.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(fornecedores).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
+                await _fornecedoresService.UpdateFornecedores(fornecedores.ToDomain());
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception ex)
             {
-                if (!FornecedoresExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return BadRequest(ex.Message);
             }
 
-            return NoContent();
+            return Ok();
         }
 
         // POST: api/Fornecedores
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Fornecedores>> PostFornecedores(FornecedoresModel fornecedores)
+        public async Task<ActionResult<FornecedoresModel>> PostFornecedores(FornecedoresModel fornecedores)
         {
-            _context.Fornecedores.Add(fornecedores.ToDomain());
-            await _context.SaveChangesAsync();
+            await _fornecedoresService.SaveFornecedores(fornecedores.ToDomain());
 
             return CreatedAtAction("GetFornecedores", new { id = fornecedores.IdFornecedor }, fornecedores);
         }
@@ -88,21 +68,16 @@ namespace Lojinha.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteFornecedores(int id)
         {
-            var fornecedores = await _context.Fornecedores.FindAsync(id);
-            if (fornecedores == null)
+            try
             {
-                return NotFound();
+                await _fornecedoresService.DeleteFornecedores(id);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
 
-            _context.Fornecedores.Remove(fornecedores);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool FornecedoresExists(int id)
-        {
-            return _context.Fornecedores.Any(e => e.IdFornecedor == id);
+            return Ok();
         }
     }
 }

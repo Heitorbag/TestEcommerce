@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
 using Lojinha.Models;
-using Lojinha.Domain;
+using Lojinha.Aplicacao;
 using System.ComponentModel.DataAnnotations;
 
 namespace Lojinha.Controllers
@@ -15,31 +9,26 @@ namespace Lojinha.Controllers
     [ApiController]
     public class UsuarioController : ControllerBase
     {
-        private readonly TodoContext _context;
+        private readonly IUsuarioService _usuarioService;
 
-        public UsuarioController(TodoContext context)
+        public UsuarioController(IUsuarioService usuarioService)
         {
-            _context = context;
+            _usuarioService = usuarioService;
         }
 
         // GET: api/Usuario
         [HttpGet]
         public ActionResult<IEnumerable<UsuarioModel>> GetUsuarios()
         {
-            return _context.Usuarios.ToListAsync().GetAwaiter().GetResult().Select(a => a.ToModel()).ToList();
+            return _usuarioService.ListUsuario().Select(a => a.ToModel()).ToList();
         }
 
         // GET: api/Usuario/5
         [HttpGet("{id}")]
         public async Task<ActionResult<UsuarioModel>> GetUsuario(int id)
         {
-            var usuario = await _context.Usuarios.FindAsync(id);
-
-            if (usuario == null)
-            {
-                return NotFound();
-            }
-
+            var usuario = await _usuarioService.GetUsuario(id);
+    
             return usuario.ToModel();
         }
 
@@ -73,46 +62,22 @@ namespace Lojinha.Controllers
                 return BadRequest("O endereço é obrigatório.");
             };
 
-            var verificarEmail = await _context.Usuarios.AsNoTracking().FirstOrDefaultAsync(i => i.Id == id);
-            if (verificarEmail == null) 
-            {
-                return BadRequest("E-mail não encontrado.");
-            }     
-
-            if (verificarEmail.Email != usuario.Email)
-            {
-                bool emailExistente = await _context.Usuarios.AnyAsync(u => u.Email == usuario.Email);
-                if (emailExistente)
-                {
-                    return BadRequest("Já existe um usuário cadastrado com este e-mail.");
-                }
-            }
-
-            _context.Entry(usuario).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
+                await _usuarioService.UpdateUsuario(usuario.ToDomain());
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception ex)
             {
-                if (!UsuarioExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return BadRequest(ex.Message);
             }
 
-            return NoContent();
+            return Ok();
         }
 
         // POST: api/Usuario
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Usuario>> PostUsuario(UsuarioModel usuario)
+        public async Task<ActionResult<UsuarioModel>> PostUsuario(UsuarioModel usuario)
         {
             if (string.IsNullOrWhiteSpace(usuario.Nome))
             {
@@ -134,14 +99,7 @@ namespace Lojinha.Controllers
                 return BadRequest("O endereço é obrigatório.");
             };
 
-            bool emailExistente = await _context.Usuarios.AnyAsync(u => u.Email == usuario.Email);
-            if (emailExistente)
-            {
-                return BadRequest("Já existe um usuário cadastrado com este e-mail.");
-            }
-
-            _context.Usuarios.Add(usuario.ToDomain());
-            await _context.SaveChangesAsync();
+            await _usuarioService.SaveUsuario(usuario.ToDomain());
 
             return CreatedAtAction("GetUsuario", new { id = usuario.Id }, usuario);
         }
@@ -150,45 +108,16 @@ namespace Lojinha.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUsuario(int id)
         {
-            var usuario = await _context.Usuarios.FindAsync(id);
-            if (usuario == null)
+            try
             {
-                return NotFound();
+                await _usuarioService.DeleteUsuario(id);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
 
-            var pedidos = await _context.Pedidos.FirstOrDefaultAsync(p => p.IdClient == usuario.Id);
-            if (pedidos != null)
-            {
-                var itemPedidos = await _context.ItemsPedidos.FirstOrDefaultAsync(i => i.IdPedido == pedidos.IdPedido);
-                if (itemPedidos != null)
-                {
-                    var estoque = await _context.Estoque.FirstOrDefaultAsync(e => e.IdProduto == itemPedidos.IdProduto);
-                    if (estoque != null)
-                    {
-                        estoque.Quantidade += itemPedidos.Quantidade;
-                        _context.Estoque.Update(estoque);
-
-                        var produto = await _context.Produtos.FirstOrDefaultAsync(p => p.IdProduto == itemPedidos.IdProduto);
-                        if (produto != null)
-                        {
-                            produto.Estoque = estoque.Quantidade;
-                            _context.Produtos.Update(produto);
-                        }
-                    }
-                    _context.ItemsPedidos.Remove(itemPedidos);
-                }
-                _context.Pedidos.Remove(pedidos);
-            }
-
-            _context.Usuarios.Remove(usuario);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool UsuarioExists(int id)
-        {
-            return _context.Usuarios.Any(e => e.Id == id);
+            return Ok();
         }
     }
 }

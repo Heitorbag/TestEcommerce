@@ -1,15 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
 using Lojinha.Models;
-using Lojinha.Domain;
-using System.Drawing;
-using System.Runtime.ConstrainedExecution;
-using Microsoft.AspNetCore.DataProtection;
+using Lojinha.Aplicacao;
 
 namespace Lojinha.Controllers
 {
@@ -17,30 +8,25 @@ namespace Lojinha.Controllers
     [ApiController]
     public class PedidoController : ControllerBase
     {
-        private readonly TodoContext _context;
+        private readonly IPedidoService _pedidoService;
 
-        public PedidoController(TodoContext context)
+        public PedidoController(IPedidoService pedidoService)
         {
-            _context = context;
+            _pedidoService = pedidoService;
         }
 
         // GET: api/Pedido
         [HttpGet]
         public ActionResult<IEnumerable<PedidoModel>> GetPedidos()
         {
-            return _context.Pedidos.ToListAsync().GetAwaiter().GetResult().Select(a => a.ToModel()).ToList();
+            return _pedidoService.ListPedidos().Select(a => a.ToModel()).ToList();
         }
 
         // GET: api/Pedido/5
         [HttpGet("{id}")]
         public async Task<ActionResult<PedidoModel>> GetPedido(int id)
         {
-            var pedido = await _context.Pedidos.FindAsync(id);
-
-            if (pedido == null)
-            {
-                return NotFound();
-            }
+            var pedido = await _pedidoService.GetPedido(id);
 
             return pedido.ToModel();
         }
@@ -58,38 +44,23 @@ namespace Lojinha.Controllers
             if (pedido.IdClient == 0)
             {
                 return BadRequest("O ID do Cliente não pode ser zero.");
-            }
-
-            var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Id == pedido.IdClient);
-            if (usuario == null)
-            {
-                return BadRequest("Cliente não encontrado.");
-            }
+            }       
 
             if (decimal.IsNegative(pedido.ValorTotal))
             {
                 return BadRequest("Valor não pode ser negativo.");
             }
-                
-            _context.Entry(pedido).State = EntityState.Modified;
-
+                       
             try
             {
-                await _context.SaveChangesAsync();
+               await _pedidoService.UpdatePedido(pedido.ToDomain());
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception ex)
             {
-                if (!PedidoExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return BadRequest(ex.Message);
             }
 
-            return NoContent();
+            return Ok();
         }
 
         // POST: api/Pedido
@@ -105,23 +76,14 @@ namespace Lojinha.Controllers
             if (pedido.IdClient == 0)
             {
                 return BadRequest("O ID do Cliente não pode ser zero.");
-            }
-
-            var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Id == pedido.IdClient); 
-            if (usuario == null)
-            {
-                return BadRequest("Cliente não encontrado.");
-            }
+            }  
 
             if (decimal.IsNegative(pedido.ValorTotal))
             {
                 return BadRequest("Valor não pode ser negativo.");
             }
 
-            pedido.DataPedido = DateTime.Now;
-
-            _context.Pedidos.Add(pedido.ToDomain());
-            await _context.SaveChangesAsync();
+            await _pedidoService.SavePedido(pedido.ToDomain());
 
             return CreatedAtAction("GetPedido", new { id = pedido.IdPedido }, pedido);
         }
@@ -129,42 +91,17 @@ namespace Lojinha.Controllers
         // DELETE: api/Pedido/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePedido(int id)
-        {
-            var pedido = await _context.Pedidos.FindAsync(id);
-            if (pedido == null)
+        {        
+            try
             {
-                return NotFound();
+               await _pedidoService.DeletePedido(id);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
 
-            var itemPedidos = await _context.ItemsPedidos.FirstOrDefaultAsync(i => i.IdPedido == pedido.IdPedido);
-
-            if (itemPedidos != null)
-            {
-                var estoque = await _context.Estoque.FirstOrDefaultAsync(e => e.IdProduto == itemPedidos.IdProduto);
-                if (estoque != null)
-                {
-                    estoque.Quantidade += itemPedidos.Quantidade;
-                    _context.Estoque.Update(estoque);
-
-                    var produto = await _context.Produtos.FirstOrDefaultAsync(p => p.IdProduto == itemPedidos.IdProduto);
-                    if (produto != null)
-                    {
-                        produto.Estoque = estoque.Quantidade;
-                        _context.Produtos.Update(produto);
-                    }
-                }
-                _context.ItemsPedidos.Remove(itemPedidos);
-            }
-
-            _context.Pedidos.Remove(pedido);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool PedidoExists(int id)
-        {
-            return _context.Pedidos.Any(e => e.IdPedido == id);
+            return Ok();
         }
     }
 }

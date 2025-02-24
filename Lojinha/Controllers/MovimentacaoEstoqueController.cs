@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
 using Lojinha.Models;
-using Lojinha.Domain;
+using Lojinha.Aplicacao;
 
 namespace Lojinha.Controllers
 {
@@ -14,30 +8,25 @@ namespace Lojinha.Controllers
     [ApiController]
     public class MovimentacaoEstoqueController : ControllerBase
     {
-        private readonly TodoContext _context;
+        private readonly IMovimentacaoEstoqueService _movimentacaoEstoqueService;
 
-        public MovimentacaoEstoqueController(TodoContext context)
+        public MovimentacaoEstoqueController(IMovimentacaoEstoqueService movimentacaoEstoqueService)
         {
-            _context = context;
+            _movimentacaoEstoqueService = movimentacaoEstoqueService;
         }
 
         // GET: api/MovimentacaoEstoque
         [HttpGet]
         public ActionResult<IEnumerable<MovimentacaoEstoqueModel>> GetMovimentacaoEstoque()
         {
-            return _context.MovimentacaoEstoque.ToListAsync().GetAwaiter().GetResult().Select(a => a.ToModel()).ToList();
+            return _movimentacaoEstoqueService.ListMovimentacaoEstoque().Select(a => a.ToModel()).ToList();
         }
 
         // GET: api/MovimentacaoEstoque/5
         [HttpGet("{id}")]
         public async Task<ActionResult<MovimentacaoEstoqueModel>> GetMovimentacaoEstoque(int id)
         {
-            var movimentacaoEstoque = await _context.MovimentacaoEstoque.FindAsync(id);
-
-            if (movimentacaoEstoque == null)
-            {
-                return NotFound();
-            }
+            var movimentacaoEstoque = await _movimentacaoEstoqueService.GetMovimentacaoEstoque(id);
 
             return movimentacaoEstoque.ToModel();
         }
@@ -52,37 +41,25 @@ namespace Lojinha.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(movimentacaoEstoque).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
+                await _movimentacaoEstoqueService.UpdateMovimentacaoEstoque(movimentacaoEstoque.ToDomain());
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception ex)
             {
-                if (!MovimentacaoEstoqueExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return BadRequest(ex.Message);
             }
 
-            return NoContent();
+            return Ok();
         }
 
         // POST: api/MovimentacaoEstoque
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<MovimentacaoEstoque>> PostMovimentacaoEstoque(MovimentacaoEstoqueModel movimentacaoEstoque)
+        public async Task<ActionResult<MovimentacaoEstoqueModel>> PostMovimentacaoEstoque(MovimentacaoEstoqueModel movimentacaoEstoque)
         {
 
-            movimentacaoEstoque.DataMovimentacao = DateTime.Now;
-
-            _context.MovimentacaoEstoque.Add(movimentacaoEstoque.ToDomain());
-            await _context.SaveChangesAsync();
+            await _movimentacaoEstoqueService.SaveMovimentacaoEstoque(movimentacaoEstoque.ToDomain());
 
             return CreatedAtAction("GetMovimentacaoEstoque", new { id = movimentacaoEstoque.IdMovimentacao }, movimentacaoEstoque);
         }
@@ -91,21 +68,16 @@ namespace Lojinha.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMovimentacaoEstoque(int id)
         {
-            var movimentacaoEstoque = await _context.MovimentacaoEstoque.FindAsync(id);
-            if (movimentacaoEstoque == null)
+            try
             {
-                return NotFound();
+                await _movimentacaoEstoqueService.DeleteMovimentacaoEstoque(id);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
 
-            _context.MovimentacaoEstoque.Remove(movimentacaoEstoque);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool MovimentacaoEstoqueExists(int id)
-        {
-            return _context.MovimentacaoEstoque.Any(e => e.IdMovimentacao == id);
+            return Ok();
         }
     }
 }

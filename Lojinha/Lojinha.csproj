@@ -28,12 +28,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Migrations\" />
+    <None Include="wwwroot\js\itemsPedidos.js" />
+    <None Include="wwwroot\js\pedidos.js" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="wwwroot\js\itemsPedidos.js" />
-    <None Include="wwwroot\js\pedidos.js" />
+    <ProjectReference Include="..\Lojinha.Aplicacao\Lojinha.Aplicacao.csproj" />
   </ItemGroup>
 
 </Project>
