@@ -24,14 +24,14 @@ namespace Lojinha.Controllers
 
         // GET: api/Usuario
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Usuario>>> GetUsuarios()
+        public ActionResult<IEnumerable<UsuarioModel>> GetUsuarios()
         {
-            return await _context.Usuarios.ToListAsync();
+            return _context.Usuarios.ToListAsync().GetAwaiter().GetResult().Select(a => a.ToModel()).ToList();
         }
 
         // GET: api/Usuario/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Usuario>> GetUsuario(int id)
+        public async Task<ActionResult<UsuarioModel>> GetUsuario(int id)
         {
             var usuario = await _context.Usuarios.FindAsync(id);
 
@@ -40,13 +40,13 @@ namespace Lojinha.Controllers
                 return NotFound();
             }
 
-            return usuario;
+            return usuario.ToModel();
         }
 
         // PUT: api/Usuario/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUsuario(int id, Usuario usuario)
+        public async Task<IActionResult> PutUsuario(int id, UsuarioModel usuario)
         {
             if (id != usuario.Id)
             {
@@ -112,7 +112,7 @@ namespace Lojinha.Controllers
         // POST: api/Usuario
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Usuario>> PostUsuario(Usuario usuario)
+        public async Task<ActionResult<Usuario>> PostUsuario(UsuarioModel usuario)
         {
             if (string.IsNullOrWhiteSpace(usuario.Nome))
             {
@@ -140,7 +140,7 @@ namespace Lojinha.Controllers
                 return BadRequest("Já existe um usuário cadastrado com este e-mail.");
             }
 
-            _context.Usuarios.Add(usuario);
+            _context.Usuarios.Add(usuario.ToDomain());
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetUsuario", new { id = usuario.Id }, usuario);

@@ -26,14 +26,14 @@ namespace Lojinha.Controllers
 
         // GET: api/Pedido
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Pedido>>> GetPedidos()
+        public ActionResult<IEnumerable<PedidoModel>> GetPedidos()
         {
-            return await _context.Pedidos.ToListAsync();
+            return _context.Pedidos.ToListAsync().GetAwaiter().GetResult().Select(a => a.ToModel()).ToList();
         }
 
         // GET: api/Pedido/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Pedido>> GetPedido(int id)
+        public async Task<ActionResult<PedidoModel>> GetPedido(int id)
         {
             var pedido = await _context.Pedidos.FindAsync(id);
 
@@ -42,13 +42,13 @@ namespace Lojinha.Controllers
                 return NotFound();
             }
 
-            return pedido;
+            return pedido.ToModel();
         }
 
         // PUT: api/Pedido/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPedido(int id, Pedido pedido)
+        public async Task<IActionResult> PutPedido(int id, PedidoModel pedido)
         {
             if (id != pedido.IdPedido)
             {
@@ -95,8 +95,12 @@ namespace Lojinha.Controllers
         // POST: api/Pedido
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Pedido>> PostPedido(Pedido pedido)
+        public async Task<ActionResult<PedidoModel>> PostPedido(PedidoModel pedido)
         {
+            if (ModelState.IsValid)
+            {
+                return BadRequest("Pedido não é valido.");
+            }
            
             if (pedido.IdClient == 0)
             {
@@ -116,7 +120,7 @@ namespace Lojinha.Controllers
 
             pedido.DataPedido = DateTime.Now;
 
-            _context.Pedidos.Add(pedido);
+            _context.Pedidos.Add(pedido.ToDomain());
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetPedido", new { id = pedido.IdPedido }, pedido);

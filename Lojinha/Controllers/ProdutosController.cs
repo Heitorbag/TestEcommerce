@@ -24,14 +24,14 @@ namespace Lojinha.Controllers
 
         // GET: api/Produtos
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Produtos>>> GetProdutos()
+        public ActionResult<IEnumerable<ProdutosModel>> GetProdutos()
         {
-            return await _context.Produtos.ToListAsync();
+            return _context.Produtos.ToListAsync().GetAwaiter().GetResult().Select(a => a.ToModel()).ToList();
         }
 
         // GET: api/Produtos/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Produtos>> GetProdutos(int id)
+        public async Task<ActionResult<ProdutosModel>> GetProdutos(int id)
         {
             var produtos = await _context.Produtos.FindAsync(id);
 
@@ -40,13 +40,13 @@ namespace Lojinha.Controllers
                 return NotFound();
             }
 
-            return produtos;
+            return produtos.ToModel();
         }
 
         // PUT: api/Produtos/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutProdutos(int id, Produtos produtos)
+        public async Task<IActionResult> PutProdutos(int id, ProdutosModel produtos)
         {
             if (id != produtos.IdProduto)
             {
@@ -108,7 +108,7 @@ namespace Lojinha.Controllers
         // POST: api/Produtos
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Produtos>> PostProdutos(Produtos produtos)
+        public async Task<ActionResult<Produtos>> PostProdutos(ProdutosModel produtos)
         {
 
             if (string.IsNullOrWhiteSpace(produtos.Nome))
@@ -130,7 +130,7 @@ namespace Lojinha.Controllers
                 return BadRequest("Estoque não pode ser negativo!.");
             }
 
-            _context.Produtos.Add(produtos);
+            _context.Produtos.Add(produtos.ToDomain());
             await _context.SaveChangesAsync();
 
             Estoque estoque = new Estoque

@@ -23,14 +23,14 @@ namespace Lojinha.Controllers
 
         // GET: api/MovimentacaoEstoque
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MovimentacaoEstoque>>> GetMovimentacaoEstoque()
+        public ActionResult<IEnumerable<MovimentacaoEstoqueModel>> GetMovimentacaoEstoque()
         {
-            return await _context.MovimentacaoEstoque.ToListAsync();
+            return _context.MovimentacaoEstoque.ToListAsync().GetAwaiter().GetResult().Select(a => a.ToModel()).ToList();
         }
 
         // GET: api/MovimentacaoEstoque/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<MovimentacaoEstoque>> GetMovimentacaoEstoque(int id)
+        public async Task<ActionResult<MovimentacaoEstoqueModel>> GetMovimentacaoEstoque(int id)
         {
             var movimentacaoEstoque = await _context.MovimentacaoEstoque.FindAsync(id);
 
@@ -39,13 +39,13 @@ namespace Lojinha.Controllers
                 return NotFound();
             }
 
-            return movimentacaoEstoque;
+            return movimentacaoEstoque.ToModel();
         }
 
         // PUT: api/MovimentacaoEstoque/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutMovimentacaoEstoque(int id, MovimentacaoEstoque movimentacaoEstoque)
+        public async Task<IActionResult> PutMovimentacaoEstoque(int id, MovimentacaoEstoqueModel movimentacaoEstoque)
         {
             if (id != movimentacaoEstoque.IdMovimentacao)
             {
@@ -76,12 +76,12 @@ namespace Lojinha.Controllers
         // POST: api/MovimentacaoEstoque
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<MovimentacaoEstoque>> PostMovimentacaoEstoque(MovimentacaoEstoque movimentacaoEstoque)
+        public async Task<ActionResult<MovimentacaoEstoque>> PostMovimentacaoEstoque(MovimentacaoEstoqueModel movimentacaoEstoque)
         {
 
             movimentacaoEstoque.DataMovimentacao = DateTime.Now;
 
-            _context.MovimentacaoEstoque.Add(movimentacaoEstoque);
+            _context.MovimentacaoEstoque.Add(movimentacaoEstoque.ToDomain());
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetMovimentacaoEstoque", new { id = movimentacaoEstoque.IdMovimentacao }, movimentacaoEstoque);

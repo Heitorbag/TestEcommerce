@@ -23,14 +23,14 @@ namespace Lojinha.Controllers
 
         // GET: api/Fornecedores
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Fornecedores>>> GetFornecedores()
+        public ActionResult<IEnumerable<FornecedoresModel>> GetFornecedores()
         {
-            return await _context.Fornecedores.ToListAsync();
+            return _context.Fornecedores.ToListAsync().GetAwaiter().GetResult().Select(a => a.ToModel()).ToList();
         }
 
         // GET: api/Fornecedores/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Fornecedores>> GetFornecedores(int id)
+        public async Task<ActionResult<FornecedoresModel>> GetFornecedores(int id)
         {
             var fornecedores = await _context.Fornecedores.FindAsync(id);
 
@@ -39,13 +39,13 @@ namespace Lojinha.Controllers
                 return NotFound();
             }
 
-            return fornecedores;
+            return fornecedores.ToModel();
         }
 
         // PUT: api/Fornecedores/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutFornecedores(int id, Fornecedores fornecedores)
+        public async Task<IActionResult> PutFornecedores(int id, FornecedoresModel fornecedores)
         {
             if (id != fornecedores.IdFornecedor)
             {
@@ -76,9 +76,9 @@ namespace Lojinha.Controllers
         // POST: api/Fornecedores
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Fornecedores>> PostFornecedores(Fornecedores fornecedores)
+        public async Task<ActionResult<Fornecedores>> PostFornecedores(FornecedoresModel fornecedores)
         {
-            _context.Fornecedores.Add(fornecedores);
+            _context.Fornecedores.Add(fornecedores.ToDomain());
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetFornecedores", new { id = fornecedores.IdFornecedor }, fornecedores);

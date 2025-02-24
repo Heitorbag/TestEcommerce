@@ -23,14 +23,14 @@ namespace Lojinha.Controllers
 
         // GET: api/Estoque
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Estoque>>> GetEstoque()
+        public ActionResult<IEnumerable<EstoqueModel>> GetEstoque()
         {
-            return await _context.Estoque.ToListAsync();
+            return _context.Estoque.ToListAsync().GetAwaiter().GetResult().Select(a => a.ToModel()).ToList();
         }
 
         // GET: api/Estoque/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Estoque>> GetEstoque(int id)
+        public async Task<ActionResult<EstoqueModel>> GetEstoque(int id)
         {
             var estoque = await _context.Estoque.FindAsync(id);
 
@@ -39,13 +39,13 @@ namespace Lojinha.Controllers
                 return NotFound();
             }
 
-            return estoque;
+            return estoque.ToModel();
         }
 
         // PUT: api/Estoque/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutEstoque(int id, Estoque estoque)
+        public async Task<IActionResult> PutEstoque(int id, EstoqueModel estoque)
         {
             if (id != estoque.Id)
             {
@@ -107,7 +107,7 @@ namespace Lojinha.Controllers
         // POST: api/Estoque
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Estoque>> PostEstoque(Estoque estoque)
+        public async Task<ActionResult<Estoque>> PostEstoque(EstoqueModel estoque)
         {
             if (string.IsNullOrWhiteSpace(estoque.Nome))
             {
@@ -144,7 +144,7 @@ namespace Lojinha.Controllers
 
             estoque.IdProduto = produtos.IdProduto;
 
-            _context.Estoque.Add(estoque);
+            _context.Estoque.Add(estoque.ToDomain());
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetEstoque", new { id = estoque.Id }, estoque);

@@ -23,14 +23,14 @@ namespace Lojinha.Controllers
 
         // GET: api/ItemsPedidos
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ItemsPedidos>>> GetItemsPedidos()
+        public ActionResult<IEnumerable<ItemsPedidosModel>> GetItemsPedidos()
         {
-            return await _context.ItemsPedidos.ToListAsync();
+            return _context.ItemsPedidos.ToListAsync().GetAwaiter().GetResult().Select(a => a.ToModel()).ToList();
         }
 
         // GET: api/ItemsPedidos/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ItemsPedidos>> GetItemsPedidos(int id)
+        public async Task<ActionResult<ItemsPedidosModel>> GetItemsPedidos(int id)
         {
             var itemsPedidos = await _context.ItemsPedidos.FindAsync(id);
 
@@ -39,13 +39,13 @@ namespace Lojinha.Controllers
                 return NotFound();
             }
 
-            return itemsPedidos;
+            return itemsPedidos.ToModel();
         }
 
         // PUT: api/ItemsPedidos/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutItemsPedidos(int id, ItemsPedidos itemsPedidos)
+        public async Task<IActionResult> PutItemsPedidos(int id, ItemsPedidosModel itemsPedidos)
         {
 
             if (id != itemsPedidos.Id)
@@ -156,7 +156,7 @@ namespace Lojinha.Controllers
         // POST: api/ItemsPedidos
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<ItemsPedidos>> PostItemsPedidos(ItemsPedidos itemsPedidos)
+        public async Task<ActionResult<ItemsPedidos>> PostItemsPedidos(ItemsPedidosModel itemsPedidos)
         {
 
             if (itemsPedidos.IdPedido == 0 || itemsPedidos.IdProduto == 0 || itemsPedidos.Valor == 0)
@@ -194,7 +194,7 @@ namespace Lojinha.Controllers
 
             _context.Estoque.Update(estoque);
             _context.Pedidos.Update(pedidos);
-            _context.ItemsPedidos.Add(itemsPedidos);
+            _context.ItemsPedidos.Add(itemsPedidos.ToDomain());
             _context.Produtos.Update(produtos);
             await _context.SaveChangesAsync();
 
