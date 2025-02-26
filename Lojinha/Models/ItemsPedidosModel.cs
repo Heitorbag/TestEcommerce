@@ -6,6 +6,7 @@ namespace Lojinha.Models
     {
         public int Id { get; set; }
 
+        [Required(ErrorMessage = "O valor é obrigatório.")]
         [Range(0, 999999.99, ErrorMessage = "A quantidade de compra não pode ser negativa.")]
         public decimal Valor { get; set; }
 
@@ -15,6 +16,7 @@ namespace Lojinha.Models
         [Required(ErrorMessage = "O Id do Produto é obrigatório.")]
         public int IdProduto { get; set; }
 
+        [Required(ErrorMessage = "A quantidade é obrigatório.")]
         [Range(0, 999999.99, ErrorMessage = "A quantidade de compra não pode ser negativa.")]
         public decimal Quantidade { get; set; }
     }

@@ -1,8 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Lojinha.Controllers;
 using Microsoft.AspNetCore.Mvc;
-using Lojinha.Aplicacao;
 using Lojinha.Persistencia;
+using Lojinha.Aplicacao.Interfaces;
+using Lojinha.Aplicacao.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,7 +12,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<LojinhaContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

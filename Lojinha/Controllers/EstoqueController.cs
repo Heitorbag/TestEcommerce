@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Lojinha.Models;
-using Lojinha.Aplicacao;
+using Lojinha.Aplicacao.Interfaces;
 
 namespace Lojinha.Controllers
 {
